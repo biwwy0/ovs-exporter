@@ -19,7 +19,7 @@ type OvsDumpReader struct {
 }
 
 var (
-	flowLine       *regexp.Regexp = regexp.MustCompile("cookie=(?P<cookie>[^,]*), duration=(?P<duration>[^,]*)s, table=(?P<table>[^,]*), n_packets=(?P<packets>[^,]*), n_bytes=(?P<bytes>[^,]*), idle_age=(?P<idle_age>[^,]*), hard_age=(?P<hard_age>[^,]*), priority=(?P<priority>[^,]*)(,(?P<match>[^ ]*))? actions=(?P<actions>.*)")
+	flowLine       *regexp.Regexp = regexp.MustCompile("cookie=(?P<cookie>[^,]*), duration=(?P<duration>[^,]*)s, table=(?P<table>[^,]*), n_packets=(?P<packets>[^,]*), n_bytes=(?P<bytes>[^,]*), idle_age=(?P<idle_age>[^,]*)(, (?P<hard_age>[^ ]*))?, priority=(?P<priority>[^,]*)(,(?P<match>[^ ]*))? actions=(?P<actions>.*)")
 	portLine       *regexp.Regexp = regexp.MustCompile(`port\s*(?P<port>[^:]*):\srx\spkts=(?P<rxpackets>[^,]*),\sbytes=(?P<rxbytes>[^,]*),\sdrop=(?P<rxdrops>[^,]*),\serrs=(?P<rxerrors>[^,]*),\sframe=(?P<rxframerr>[^,]*),\sover=(?P<rxoverruns>[^,]*),\scrc=(?P<rxcrcerrors>[^,]*)\s.*tx\spkts=(?P<txpackets>[^,]*),\sbytes=(?P<txbytes>[^,]*),\sdrop=(?P<txdrops>[^,]*),\serrs=(?P<txerrors>[^,]*),\scoll=(?P<txcollisions>.*)`)
 	groupsLine     *regexp.Regexp = regexp.MustCompile(`group_id=(?P<groupid>.*?),\s*type=(?P<type>[^,]*),bucket=(?P<buckets>.*$)`)
 	bucketAction   *regexp.Regexp = regexp.MustCompile("actions=(.*?),?$")
@@ -39,6 +39,7 @@ func getRegexpMap(match []string, names []string) map[string]string {
 func parseOpenFlowFlowDumpLine(line string) Flow {
 	match := flowLine.FindStringSubmatch(line)
 	result := getRegexpMap(match, flowLine.SubexpNames())
+
 	//TODO: we need to consider if len(result) == 0 is an error or business as usual
 	duration, _ := strconv.ParseFloat(result["duration"], 64)
 	packets, _ := strconv.Atoi(result["packets"])
